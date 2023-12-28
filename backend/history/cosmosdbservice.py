@@ -120,7 +120,8 @@ class CosmosConversationClient():
             'updatedAt': datetime.utcnow().isoformat(),
             'conversationId' : conversation_id,
             'role': input_message['role'],
-            'content': input_message['content']
+            'content': input_message['content'],
+            'isPositive': 1
         }
         
         resp = self.container_client.upsert_item(message)  
@@ -155,3 +156,29 @@ class CosmosConversationClient():
         else:
             return messages
 
+    def get_last_message(self, user_id, conversation_id):
+        parameters = [
+        {'name': '@conversationId', 'value': conversation_id},
+        {'name': '@userId', 'value': user_id}
+    ]
+        query = f"SELECT * FROM c WHERE c.conversationId = @conversationId AND c.type='message' AND c.userId = @userId ORDER BY c.createdAt DESC OFFSET 0 LIMIT 1"
+        last_message = list(self.container_client.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+        return last_message[0] if last_message else None
+    
+    def update_message(self, user_id, conversation_id, message_id, is_positive):
+        try:
+            # Retrieve the message
+            message = self.container_client.read_item(item=message_id, partition_key=user_id)
+            if message:
+                # Update the is_positive attribute
+                message['isPositive'] = is_positive
+                message['updatedAt'] = datetime.utcnow().isoformat()
+
+                # Upsert the updated message back into CosmosDB
+                resp = self.container_client.upsert_item(message)
+                return resp
+            else:
+                return False
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
