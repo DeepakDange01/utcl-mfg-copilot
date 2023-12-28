@@ -10,6 +10,8 @@ import { isEmpty } from "lodash-es";
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
+import ABG_Logo from "../../assets/utcl.svg";
+
 
 import {
     ChatMessage,
@@ -25,6 +27,7 @@ import {
     historyClear,
     ChatHistoryLoadingState,
     CosmosDBStatus,
+    handleFeedback,
     ErrorMessage
 } from "../../api";
 import { Answer } from "../../components/Answer";
@@ -564,6 +567,7 @@ const Chat = () => {
     const disabledButton = () => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
+    
 
     return (
         <div className={styles.container} role="main">
@@ -586,12 +590,12 @@ const Chat = () => {
                         {!messages || messages.length < 1 ? (
                             <Stack className={styles.chatEmptyState}>
                                 <img
-                                    src={Azure}
+                                    src={ABG_Logo}
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
+                                <h2 className={styles.chatEmptyStateSubtitle}></h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
@@ -610,6 +614,20 @@ const Chat = () => {
                                                     }}
                                                     onCitationClicked={c => onShowCitation(c)}
                                                 />
+                                                <div className={styles.feedbackButtons}>
+                    <IconButton
+                        iconProps={{ iconName: 'Like' }}
+                        title="Thumbs Up"
+                        ariaLabel="Give positive feedback"
+                        onClick={() => handleFeedback(2,appStateContext?.state?.currentChat?.id)}
+                    />
+                    <IconButton
+                        iconProps={{ iconName: 'Dislike' }}
+                        title="Thumbs Down"
+                        ariaLabel="Give negative feedback"
+                        onClick={() => handleFeedback(0,appStateContext?.state?.currentChat?.id)}
+                    />
+                </div>
                                             </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
                                                 <Stack horizontal className={styles.chatMessageErrorContent}>
                                                     <ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />
@@ -717,7 +735,13 @@ const Chat = () => {
                             <span aria-label="Citations" className={styles.citationPanelHeader}>Citations</span>
                             <IconButton iconProps={{ iconName: 'Cancel'}} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)}/>
                         </Stack>
-                        <h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url && !activeCitation.url.includes("blob.core") ? activeCitation.url : activeCitation.title ?? ""} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5>
+                        {/* <h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url ? activeCitation.url : activeCitation.title ?? ""} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5> */}
+                        <h5 className={styles.citationPanelTitle} tabIndex={0} onClick={() => onViewSource(activeCitation)}>
+    {activeCitation.url ?
+<a href={activeCitation.url} target="_blank" rel="noopener noreferrer">{activeCitation.title}</a> :
+        activeCitation.title
+    }
+</h5>
                         <div tabIndex={0}> 
                         <ReactMarkdown 
                             linkTarget="_blank"

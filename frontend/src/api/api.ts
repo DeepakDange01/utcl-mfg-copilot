@@ -309,3 +309,29 @@ export const frontendSettings = async (): Promise<Response | null> => {
 
     return response
 }
+export const handleFeedback = async (isPositive:Number,conversationId?:string) => {
+    // Define the request payload
+    const payload = {
+        
+        conversationId: conversationId, // The ID of the current conversation
+        
+        isPositive: isPositive
+    };
+
+    // Send feedback to the backend
+    try {
+        const response = await fetch('/api/updateLastMessageFeedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update message feedback');
+        }
+    } catch (error) {
+        console.error('Error updating feedback:', error);
+    }
+};

@@ -597,7 +597,29 @@ def conversation_internal(request_body):
     except Exception as e:
         logging.exception("Exception in /conversation")
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/updateLastMessageFeedback', methods=['POST'])
+def update_last_message_feedback():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_id = authenticated_user['user_principal_id']
+    ## check request for conversation_id
+    # conversation_id = request.json.get("conversation_id", None)
+    data = request.json
+    # user_id = data['userId']
+    conversation_id = data['conversationId']
+    is_positive = data['isPositive']
 
+    last_message = cosmos_conversation_client.get_last_message(user_id, conversation_id)
+    if last_message:
+        message_id = last_message['id']
+        updated_message = cosmos_conversation_client.update_message(user_id, conversation_id, message_id, is_positive)
+        if updated_message:
+            return {'status': 'success', 'messageId': updated_message['id']}
+        else:
+            return {'status': 'error'}, 500
+    else:
+        return {'status': 'no_message_found'}, 404
+    
 ## Conversation History API ## 
 @app.route("/history/generate", methods=["POST"])
 def add_conversation():
@@ -801,7 +823,8 @@ def delete_all_conversations():
     
     except Exception as e:
         logging.exception("Exception in /history/delete_all")
-        return jsonify({"error": str(e)}), 500
+        # return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Exception: {str(e)}"}), 500
     
 
 @app.route("/history/clear", methods=["POST"])
