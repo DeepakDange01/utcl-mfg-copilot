@@ -739,6 +739,7 @@ def list_conversations():
     offset = request.args.get("offset", 0)
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
+    # print(authenticated_user)
 
     ## get the conversations from cosmos
     conversations = cosmos_conversation_client.get_conversations(user_id, offset=offset, limit=25)
