@@ -205,6 +205,8 @@ def generateFilterString(userToken):
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
+    request_messages = request_messages[-4:]
+    print(request_messages)
 
     body = {
         "messages": request_messages,
