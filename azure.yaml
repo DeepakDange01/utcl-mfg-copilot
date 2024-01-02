@@ -51,6 +51,8 @@ pool:
 
 variables:
   pythonVersion: '3.11'
+  name: azureSubscription
+  value: 'GDNA Azure Subscription'
 
 stages:
 - stage: Build
@@ -85,7 +87,8 @@ stages:
           steps:
           - task: AzureWebApp@1
             inputs:
-              appName: 'your-web-app-name'
+              azureSubscription: $(azureSubscription)
+              appName: 'utcl-mfg-copilot-v3'
               package: '$(Build.ArtifactStagingDirectory)/frontend'
               runtimeStack: 'PYTHON|$(pythonVersion)'
               startUpCommand: 'python app.py'
