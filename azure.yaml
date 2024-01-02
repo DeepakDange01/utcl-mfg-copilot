@@ -63,7 +63,7 @@ stages:
         addToPath: true
     - script: |
         python -m pip install --upgrade pip
-        pip install -r ./backend/requirements.txt
+        pip install -r requirements.txt
       displayName: 'Install Python dependencies'
 
   - job: BuildFrontend
@@ -88,4 +88,4 @@ stages:
               appName: 'your-web-app-name'
               package: '$(Build.ArtifactStagingDirectory)/frontend'
               runtimeStack: 'PYTHON|$(pythonVersion)'
-              startUpCommand: 'python ./backend/app.py'
+              startUpCommand: 'python app.py'
