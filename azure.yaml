@@ -1,94 +1,94 @@
-# # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-# name: sample-app-aoai-chatgpt
-# metadata:
-#   template: sample-app-aoai-chatgpt@0.0.1-beta
-# services:
-#   backend:
-#     project: .
-#     language: py
-#     host: appservice
-#     hooks:
-#       prepackage:
-#         windows:
-#           shell: pwsh
-#           run:  cd ./frontend;npm install;npm run build
-#           interactive: true
-#           continueOnError: false
-#         posix:
-#           shell: sh
-#           run:  cd ./frontend;npm install;npm run build
-#           interactive: true
-#           continueOnError: false
-# hooks:
-#     preprovision:
-#       windows:
-#         shell: pwsh
-#         run: ./scripts/auth_init.ps1
-#         interactive: true
-#         continueOnError: false
-#       posix:
-#         shell: sh
-#         run: ./scripts/auth_init.sh
-#         interactive: true
-#         continueOnError: false
-#     postprovision:
-#       windows:
-#         shell: pwsh
-#         run: ./scripts/auth_update.ps1;./scripts/prepdocs.ps1;
-#         interactive: true
-#         continueOnError: false
-#       posix:
-#         shell: sh
-#         run: ./scripts/auth_update.sh;./scripts/prepdocs.sh;
-#         interactive: true
-#         continueOnError: false
-trigger:
-- main
+name: sample-app-aoai-chatgpt
+metadata:
+  template: sample-app-aoai-chatgpt@0.0.1-beta
+services:
+  backend:
+    project: .
+    language: py
+    host: appservice
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run:  cd ./frontend;npm install;npm run build
+          interactive: true
+          continueOnError: false
+        posix:
+          shell: sh
+          run:  cd ./frontend;npm install;npm run build
+          interactive: true
+          continueOnError: false
+hooks:
+    preprovision:
+      windows:
+        shell: pwsh
+        run: ./scripts/auth_init.ps1
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./scripts/auth_init.sh
+        interactive: true
+        continueOnError: false
+    postprovision:
+      windows:
+        shell: pwsh
+        run: ./scripts/auth_update.ps1;./scripts/prepdocs.ps1;
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./scripts/auth_update.sh;./scripts/prepdocs.sh;
+        interactive: true
+        continueOnError: false
+# trigger:
+# - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+# pool:
+#   vmImage: 'ubuntu-latest'
 
-variables:
-  pythonVersion: '3.11'
-  name: azureSubscription
-  value: 'GDNA Azure Subscription'
+# variables:
+#   pythonVersion: '3.11'
+#   name: azureSubscription
+#   value: 'GDNA Azure Subscription'
 
-stages:
-- stage: Build
-  jobs:
-  - job: BuildBackend
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(pythonVersion)'
-        addToPath: true
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-      displayName: 'Install Python dependencies'
+# stages:
+# - stage: Build
+#   jobs:
+#   - job: BuildBackend
+#     steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(pythonVersion)'
+#         addToPath: true
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#       displayName: 'Install Python dependencies'
 
-  - job: BuildFrontend
-    steps:
-    - script: |
-        cd frontend
-        npm install
-        npm run build
-      displayName: 'Build frontend'
+#   - job: BuildFrontend
+#     steps:
+#     - script: |
+#         cd frontend
+#         npm install
+#         npm run build
+#       displayName: 'Build frontend'
 
-- stage: Deploy
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  jobs:
-  - deployment: DeployToAppService
-    environment: 'your-deployment-environment'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            inputs:
-              azureSubscription: $(azureSubscription)
-              appName: 'utcl-mfg-copilot-v3'
-              package: '$(Build.ArtifactStagingDirectory)/frontend'
-              runtimeStack: 'PYTHON|$(pythonVersion)'
-              startUpCommand: 'python app.py'
+# - stage: Deploy
+#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+#   jobs:
+#   - deployment: DeployToAppService
+#     environment: 'your-deployment-environment'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             inputs:
+#               azureSubscription: $(azureSubscription)
+#               appName: 'utcl-mfg-copilot-v3'
+#               package: '$(Build.ArtifactStagingDirectory)/frontend'
+#               runtimeStack: 'PYTHON|$(pythonVersion)'
+#               startUpCommand: 'python app.py'
