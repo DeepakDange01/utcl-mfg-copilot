@@ -371,6 +371,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
                     "apim-request-id": "",
                     'history_metadata': history_metadata
                 }
+                # print(response)
                 if line:
                     if AZURE_OPENAI_PREVIEW_API_VERSION == '2023-06-01-preview':
                         lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
