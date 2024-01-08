@@ -895,4 +895,4 @@ def generate_title(conversation_messages):
         return messages[-2]['content']
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
