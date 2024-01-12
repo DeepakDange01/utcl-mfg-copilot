@@ -804,6 +804,43 @@ const enum messageStatus {
     Processing = "Processing",
     Done = "Done"
 }
+interface FeedbackButtonsProps {
+    messageId: string; // Assuming messageId is a string
+    conversationId: string; // Assuming conversationId is also a string
+}
+
+const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ messageId, conversationId }) => {
+    const [selectedFeedback, setSelectedFeedback] = useState<number | null>(null);
+
+    const handleFeedbackClick = async (feedbackType: number) => {
+        setSelectedFeedback(feedbackType);
+        try {
+            await handleFeedback(feedbackType, conversationId);
+        } catch (error) {
+            console.error("Error sending feedback: ", error);
+        }
+    };
+
+
+    return (
+        <div className={styles.feedbackButtons}>
+            <IconButton
+                iconProps={{ iconName: 'Like' }}
+                title="Thumbs Up"
+                ariaLabel="Give positive feedback"
+                onClick={() => handleFeedbackClick(2)} // '2' represents positive feedback
+                className={selectedFeedback === 2 ? styles.selectedFeedbackButton : ''}
+            />
+            <IconButton
+                iconProps={{ iconName: 'Dislike' }}
+                title="Thumbs Down"
+                ariaLabel="Give negative feedback"
+                onClick={() => handleFeedbackClick(0)} // '0' represents negative feedback
+                className={selectedFeedback === 0 ? styles.selectedFeedbackButton : ''}
+            />
+        </div>
+    );
+};
 
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
@@ -1396,15 +1433,17 @@ const Chat = () => {
                                                 <div className={styles.chatMessageUserMessage}>{answer.content}</div>
                                             </div>
                                         ) : (
-                                            answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
+                                            answer.role === "assistant" ? appStateContext && appStateContext.state.currentChat &&  <div className={styles.chatMessageGpt}>
                                                 <Answer
                                                     answer={{
                                                         answer: answer.content,
                                                         citations: parseCitationFromMessage(messages[index - 1]),
                                                     }}
                                                     onCitationClicked={c => onShowCitation(c)}
+                                                    
                                                 />
-                                                <div className={styles.feedbackButtons}>
+                                                <FeedbackButtons messageId={answer.id} conversationId={appStateContext.state.currentChat.id} />
+                                                {/* <div className={styles.feedbackButtons}>
                     <IconButton
                         iconProps={{ iconName: 'Like' }}
                         title="Thumbs Up"
@@ -1417,7 +1456,7 @@ const Chat = () => {
                         ariaLabel="Give negative feedback"
                         onClick={() => handleFeedback(0,appStateContext?.state?.currentChat?.id)}
                     />
-                </div>
+                </div> */}
                                             </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
                                                 <Stack horizontal className={styles.chatMessageErrorContent}>
                                                     <ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />

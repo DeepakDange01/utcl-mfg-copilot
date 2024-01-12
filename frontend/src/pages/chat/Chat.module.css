@@ -657,6 +657,11 @@ a {
     text-decoration: underline;
     cursor: pointer;
 }
+.selectedFeedbackButton {
+    background-color: #add8e6; /* Light blue */
+    /* Add other styles as needed to indicate selection */
+}
+
 /* Fancy Radio Buttons Styles */
 .radioToolbar {
     margin-bottom: 20px;
