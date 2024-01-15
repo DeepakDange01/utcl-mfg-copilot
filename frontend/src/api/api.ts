@@ -649,15 +649,20 @@ export const frontendSettings = async (): Promise<Response | null> => {
 
     return response
 }
-export const handleFeedback = async (isPositive:Number,conversationId?:string) => {
-    // Define the request payload
+// export const handleFeedback = async (isPositive:Number,conversationId?:string) => {
+//     // Define the request payload
+//     const payload = {
+        
+//         conversationId: conversationId, // The ID of the current conversation
+        
+//         isPositive: isPositive
+//     };
+export const handleFeedback = async (isPositive:Number,conversationId?:string, textFeedback?:string) => {
     const payload = {
-        
-        conversationId: conversationId, // The ID of the current conversation
-        
-        isPositive: isPositive
+        conversationId: conversationId,
+        isPositive: isPositive,
+        textFeedback: textFeedback // Add the text feedback to the payload
     };
-
     // Send feedback to the backend
     try {
         const response = await fetch('/api/updateLastMessageFeedback', {

@@ -809,38 +809,87 @@ interface FeedbackButtonsProps {
     conversationId: string; // Assuming conversationId is also a string
 }
 
+
 const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ messageId, conversationId }) => {
     const [selectedFeedback, setSelectedFeedback] = useState<number | null>(null);
+    const [showTextbox, setShowTextbox] = useState(false);
+    const [textFeedback, setTextFeedback] = useState('');
 
     const handleFeedbackClick = async (feedbackType: number) => {
         setSelectedFeedback(feedbackType);
+
+        if (feedbackType === 0) { // '0' represents negative feedback
+            // Show the text box only for negative feedback
+            setShowTextbox(true);
+        } else if (feedbackType === 2) { // '2' represents positive feedback
+            // Submit positive feedback immediately
+            try {
+                await handleFeedback(feedbackType, conversationId, '');
+            } catch (error) {
+                console.error("Error sending feedback: ", error);
+            }
+        }
+    };
+
+    const submitFeedback = async () => {
+        if (selectedFeedback === null) {
+            console.error("Feedback type is not selected.");
+            return;
+        }
+
+        // Assuming negative feedback
         try {
-            await handleFeedback(feedbackType, conversationId);
+            await handleFeedback(selectedFeedback, conversationId, textFeedback);
+            // Reset the text feedback and hide the textbox
+            setShowTextbox(false);
+            setTextFeedback('');
         } catch (error) {
             console.error("Error sending feedback: ", error);
         }
     };
 
-
     return (
-        <div className={styles.feedbackButtons}>
-            <IconButton
-                iconProps={{ iconName: 'Like' }}
-                title="Thumbs Up"
-                ariaLabel="Give positive feedback"
-                onClick={() => handleFeedbackClick(2)} // '2' represents positive feedback
-                className={selectedFeedback === 2 ? styles.selectedFeedbackButton : ''}
-            />
-            <IconButton
-                iconProps={{ iconName: 'Dislike' }}
-                title="Thumbs Down"
-                ariaLabel="Give negative feedback"
-                onClick={() => handleFeedbackClick(0)} // '0' represents negative feedback
-                className={selectedFeedback === 0 ? styles.selectedFeedbackButton : ''}
-            />
+        <div>
+            <div className={styles.feedbackButtons}>
+                <IconButton
+                    iconProps={{ iconName: 'Like' }}
+                    title="Thumbs Up"
+                    ariaLabel="Give positive feedback"
+                    onClick={() => handleFeedbackClick(2)} // '2' represents positive feedback
+                    className={selectedFeedback === 2 ? styles.selectedFeedbackButton : ''}
+                />
+                <IconButton
+                    iconProps={{ iconName: 'Dislike' }}
+                    title="Thumbs Down"
+                    ariaLabel="Give negative feedback"
+                    onClick={() => handleFeedbackClick(0)} // '0' represents negative feedback
+                    className={selectedFeedback === 0 ? styles.selectedFeedbackButton : ''}
+                />
+            </div>
+            {showTextbox && (
+                <div>
+                    <textarea
+                        value={textFeedback}
+                        onChange={(e) => setTextFeedback(e.target.value)}
+                        placeholder="Enter additional feedback"
+                        style={{ 
+                            width: '100%', 
+                            padding: '20px', 
+                            fontSize: '16px', 
+                            border: '1px solid lightblue', 
+                            borderRadius: '8px', 
+                            boxSizing: 'border-box', 
+                            height: '100px'
+                        }}
+                    />
+                    <button onClick={submitFeedback}>Submit</button>
+                </div>
+            )}
         </div>
     );
 };
+
+
 
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
